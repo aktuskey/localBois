@@ -1,13 +1,14 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
 
+port outgoing : Model -> Cmd msg
 
 type alias Flags =
-    ()
+    Maybe Model
 
 
 type alias Model =
@@ -32,23 +33,37 @@ main =
 
 
 init : Flags -> ( Model, Cmd Msg )
-init _ =
-    ( Model "Alexa" 13, Cmd.none )
+init flags =
+    let
+        initialModel =
+            case flags of 
+                Just model ->
+                    model
+                Nothing ->
+                    Model "Alexa" 13
+    in
+    ( initialModel
+    , outgoing initialModel
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( case msg of
-        UpdateAge ageStr ->
-            case String.toInt ageStr of
-                Just age -> 
-                    { model | age = age }
-                Nothing -> 
-                    model
+    let
+        newModel =
+            case msg of
+                UpdateAge ageStr ->
+                    case String.toInt ageStr of
+                        Just age -> 
+                            { model | age = age }
+                        Nothing -> 
+                            model
 
-        UpdateName name ->
-            { model | name = name }
-    , Cmd.none
+                UpdateName name ->
+                    { model | name = name }
+    in
+    ( newModel
+    , outgoing newModel
     )
 
 
