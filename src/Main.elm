@@ -2,6 +2,8 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (onInput)
 
 
 type alias Flags =
@@ -15,7 +17,7 @@ type alias Model =
 
 
 type Msg
-    = UpdateAge Int
+    = UpdateAge String
     | UpdateName String
 
 
@@ -30,15 +32,19 @@ main =
 
 
 init : Flags -> ( Model, Cmd Msg )
-init flags =
+init _ =
     ( Model "Alexa" 13, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     ( case msg of
-        UpdateAge age ->
-            { model | age = age }
+        UpdateAge ageStr ->
+            case String.toInt ageStr of
+                Just age -> 
+                    { model | age = age }
+                Nothing -> 
+                    model
 
         UpdateName name ->
             { model | name = name }
@@ -51,6 +57,8 @@ view model =
     div []
         [ h1 [] [ text model.name ]
         , h2 [] [ text (String.fromInt model.age) ]
+        , input [ onInput UpdateName, value model.name ] []
+        , input [ onInput UpdateAge, value (String.fromInt model.age), type_ "number" ] []
         ]
 
 
